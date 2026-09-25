@@ -1,1 +1,799 @@
-/* Your SCSS here. */
+// ==========================================================================
+// VARIABLES
+// ==========================================================================
+$color-bg: #010202;     // base dark tone — used for rgba()/shadow purposes,
+                         // and swapped for the lumu-gradient wherever it used
+                         // to be a flat section background (see below)
+$color-surface: #1c1420; // dark card/navbar/modal surface — untouched
+
+// Brand colors: blue = Wang Lujie, pink = Mu Zhicheng
+$color-blue: #aee4ff;
+$color-pink: #ffccd5;
+$color-pink-dark: darken($color-pink, 35%); // hover backgrounds under light icons
+
+// Dark, saturated blend of the two brand colors — used as TEXT color only
+// in the spots where the background is now the light blue/pink gradient
+// instead of the old flat dark $color-bg (otherwise near-white text on a
+// pale gradient would be unreadable).
+$color-ink: darken(mix($color-blue, $color-pink, 50%), 55%);
+
+$color-primary: $color-pink;       // Mu Zhicheng's color, main interactive accent
+$color-primary-light: $color-pink;
+$color-accent: $color-blue;        // Wang Lujie's color, secondary/outline accent
+$color-text: #f4eef1;
+$color-text-muted: #cbb9c2;
+
+$font-heading: "Playfair Display", serif;
+$font-body: "Poppins", sans-serif;
+
+$navbar-height-top: 96px;
+$navbar-height-scrolled: 64px;
+
+$container-width: 1140px;
+$transition-fast: 0.2s ease;
+$transition-med: 0.4s ease;
+
+// Breakpoints roughly matching the required test resolutions
+$bp-1920: 1920px;
+$bp-1366: 1366px;
+$bp-1280: 1280px;
+$bp-1024: 1024px;
+$bp-768: 768px;
+
+// ==========================================================================
+// MIXINS
+// ==========================================================================
+@mixin flex-center($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin full-bleed-section($min-height: 100vh) {
+  width: 100%;
+  min-height: $min-height;
+  position: relative;
+  overflow: hidden;
+}
+
+@mixin respond($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}
+
+// Blue (Wang Lujie) on one end, pink (Mu Zhicheng) on the other, no grey
+// midpoint. The first declaration is a safety-net for browsers that don't
+// understand gradient color-interpolation syntax: instead of one smooth
+// blend (which turns grey/lavender halfway between these two pastels in
+// plain sRGB), it holds each color solid until 42%/58% and only blends
+// across the narrow strip in between, so any grey band is barely visible.
+// The second declaration is what modern browsers actually use: interpolating
+// in OKLCH keeps both hues saturated all the way across, with no grey at all.
+@mixin lumu-gradient($angle: to right) {
+  background: linear-gradient($angle, $color-blue 0%, $color-blue 42%, $color-pink 58%, $color-pink 100%);
+  background: linear-gradient($angle in oklch, $color-blue 0%, $color-pink 100%);
+}
+
+@mixin fade-up($delay: 0s) {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease $delay, transform 0.6s ease $delay;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ==========================================================================
+// RESET / BASE
+// ==========================================================================
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; // JS drives smooth scroll so nav offset is respected
+}
+
+body {
+  margin: 0;
+  font-family: $font-body;
+  @include lumu-gradient(); // left blue → right pink; was: background-color: $color-bg;
+  background-attachment: fixed;
+  color: $color-text;
+  line-height: 1.6;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section-title {
+  position: relative;
+  font-family: $font-heading;
+  font-size: 2.4rem;
+  text-align: center;
+  margin-bottom: 12px;
+  padding-bottom: 16px;
+  color: $color-text;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 3px;
+    border-radius: 2px;
+    @include lumu-gradient();
+  }
+}
+
+.section-lead {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 48px;
+  color: $color-text-muted;
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform $transition-fast, filter $transition-fast, background-color $transition-fast, color $transition-fast;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &--primary {
+    @include lumu-gradient();
+    color: $color-bg; // dark text reads far better than white on these pale colors
+
+    &:hover {
+      filter: brightness(0.92); // gradients can't use darken(), so dim on hover instead
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    border-color: $color-accent;
+    color: $color-accent;
+
+    &:hover {
+      @include lumu-gradient();
+      color: $color-bg;
+    }
+  }
+}
+
+// generic scroll-reveal helper (JS toggles .is-visible via IntersectionObserver)
+.fade-in-el {
+  @include fade-up();
+}
+
+// ==========================================================================
+// NAVBAR (sticky, resizing, position indicator)
+// ==========================================================================
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background-color: rgba($color-surface, 0.92);
+  backdrop-filter: blur(6px);
+  transition: height $transition-med, box-shadow $transition-med;
+  height: $navbar-height-top;
+
+  &.is-scrolled {
+    height: $navbar-height-scrolled;
+    box-shadow: 0 4px 18px rgba(black, 0.35);
+  }
+
+  &__inner {
+    @include flex-center();
+    justify-content: space-between;
+    max-width: $container-width;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  &__logo {
+    font-family: $font-heading;
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: $color-blue; // "LU" = Wang Lujie
+    transition: font-size $transition-med;
+
+    span {
+      color: $color-pink; // "MU" = Mu Zhicheng
+    }
+  }
+
+  &.is-scrolled &__logo {
+    font-size: 1.3rem;
+  }
+
+  &__links {
+    display: flex;
+    gap: 28px;
+  }
+
+  &__link {
+    font-size: 1rem;
+    font-weight: 400;
+    color: $color-text-muted;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color $transition-fast, border-color $transition-fast, font-size $transition-med;
+
+    &:hover {
+      color: $color-text;
+    }
+
+    &.active {
+      color: $color-primary-light;
+      border-color: $color-primary-light;
+    }
+  }
+
+  &.is-scrolled &__link {
+    font-size: 0.85rem;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    @include lumu-gradient();
+  }
+
+  @include respond($bp-768) {
+    &__links {
+      gap: 14px;
+    }
+    &__link {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// ==========================================================================
+// HERO
+// ==========================================================================
+.hero {
+  @include full-bleed-section(100vh);
+  @include flex-center(column);
+  background-image: url("../assets/hero-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    // top-to-bottom dark fade (keeps hero text readable) layered under a
+    // left-to-right blue→pink tint (the LUMU theme). Fallback first, then
+    // the OKLCH version for browsers that support grey-free interpolation.
+    background-image:
+      linear-gradient(180deg, rgba(black, 0.25), rgba($color-bg, 0.8)),
+      linear-gradient(to right, rgba($color-blue, 0.5) 0%, rgba($color-blue, 0.5) 42%, rgba($color-pink, 0.5) 58%, rgba($color-pink, 0.5) 100%);
+    background-image:
+      linear-gradient(180deg, rgba(black, 0.25), rgba($color-bg, 0.8)),
+      linear-gradient(to right in oklch, rgba($color-blue, 0.5) 0%, rgba($color-pink, 0.5) 100%);
+  }
+
+  &__content {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+  }
+
+  &__title {
+    font-family: $font-heading;
+    font-size: 5rem;
+    letter-spacing: 0.05em;
+    margin: 0 0 12px;
+    color: $color-text;
+  }
+
+  &__subtitle {
+    font-size: 1.1rem;
+    color: $color-text-muted;
+    margin-bottom: 32px;
+  }
+
+  &__scroll-hint {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-size: 1.4rem;
+    color: $color-text-muted;
+    animation: bounce 2s infinite;
+  }
+
+  @include respond($bp-1024) {
+    &__title {
+      font-size: 3.4rem;
+    }
+  }
+
+  @include respond($bp-768) {
+    &__title {
+      font-size: 2.4rem;
+    }
+    &__subtitle {
+      font-size: 0.95rem;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 10px); }
+}
+
+// ==========================================================================
+// ABOUT (multi-column)
+// Background used to be flat $color-bg — now the gradient. Since that flips
+// this section from dark to light, its heading/lead text switches to
+// $color-ink (a dark blend of the two brand colors) so it stays readable.
+// The cards themselves keep their own dark $color-surface fill, so nothing
+// inside a card needs to change.
+// ==========================================================================
+.about {
+  padding: 100px 0;
+  @include lumu-gradient(); // left blue → right pink; was: background-color: $color-bg;
+
+  .section-title,
+  .section-lead {
+    color: $color-ink;
+  }
+
+  &__columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+}
+
+.about-card {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 320px;
+  background-color: $color-surface;
+  border-radius: 16px;
+  overflow: hidden;
+  text-align: center;
+  padding-bottom: 24px;
+  transition: transform $transition-fast, box-shadow $transition-fast;
+
+  // 5px accent bar identifying who each card is about
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    z-index: 1;
+  }
+
+  &--blue {
+    &::before {
+      background-color: $color-blue;
+    }
+    .about-card__title {
+      color: $color-blue;
+    }
+  }
+
+  &--pink {
+    &::before {
+      background-color: $color-pink;
+    }
+    .about-card__title {
+      color: $color-pink;
+    }
+  }
+
+  &--gradient {
+    &::before {
+      @include lumu-gradient();
+    }
+    .about-card__title {
+      color: mix($color-blue, $color-pink, 50%);
+    }
+  }
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(black, 0.35);
+  }
+
+  &__img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    font-family: $font-heading;
+    margin: 0 0 8px;
+    color: $color-primary-light;
+  }
+
+  &__text {
+    padding: 0 20px;
+    color: $color-text-muted;
+    font-size: 0.95rem;
+  }
+}
+
+// ==========================================================================
+// GALLERY / CAROUSEL
+// ==========================================================================
+.gallery {
+  padding: 100px 0;
+  background-color: $color-surface;
+}
+
+.carousel {
+  position: relative;
+  max-width: 760px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &__track {
+    display: flex;
+    transition: transform $transition-med;
+  }
+
+  &__slide {
+    min-width: 100%;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 440px;
+      object-fit: cover;
+    }
+  }
+
+  &__caption {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    margin: 0;
+    padding: 14px;
+    text-align: center;
+    background: linear-gradient(0deg, rgba(black, 0.75), transparent);
+    color: $color-text;
+  }
+
+  &__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba($color-bg, 0.55);
+    border: none;
+    color: $color-text;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color $transition-fast;
+    z-index: 3;
+
+    &:hover {
+      background-color: $color-pink-dark; // darker than the pale accent so the white icon stays legible
+    }
+
+    &--prev {
+      left: 14px;
+    }
+    &--next {
+      right: 14px;
+    }
+  }
+
+  &__dots {
+    position: absolute;
+    bottom: 46px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+  }
+
+  &__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: rgba($color-text, 0.4);
+    cursor: pointer;
+    transition: background-color $transition-fast, transform $transition-fast;
+
+    &.active {
+      background-color: $color-primary-light;
+      transform: scale(1.3);
+    }
+  }
+
+  @include respond($bp-768) {
+    &__slide img {
+      height: 280px;
+    }
+  }
+}
+
+// ==========================================================================
+// MOMENTS (fixed background + vertical centering)
+// ==========================================================================
+.moments {
+  @include full-bleed-section(70vh);
+  @include flex-center();
+  background-image: url("../assets/bg-fixed.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  text-align: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba($color-bg, 0.55);
+  }
+
+  &__center {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    max-width: 560px;
+  }
+
+  &__title {
+    font-family: $font-heading;
+    font-size: 2.6rem;
+    margin-bottom: 12px;
+  }
+
+  &__text {
+    color: $color-text-muted;
+    margin-bottom: 28px;
+  }
+
+  // background-attachment: fixed behaves inconsistently on iOS Safari;
+  // this keeps the section usable there without breaking desktop behavior.
+  @supports (-webkit-touch-callout: none) {
+    background-attachment: scroll;
+  }
+}
+
+// ==========================================================================
+// VIDEO
+// Background used to be flat $color-bg — now the gradient (see .about above
+// for the same reasoning: text color flips to $color-ink to stay readable).
+// ==========================================================================
+.video-section {
+  padding: 100px 0;
+  @include lumu-gradient(); // left blue → right pink; was: background-color: $color-bg;
+
+  .section-title,
+  .section-lead {
+    color: $color-ink;
+  }
+}
+
+.video-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(black, 0.4);
+
+  video {
+    width: 100%;
+    display: block;
+  }
+}
+
+// ==========================================================================
+// FOOTER / CONTACT
+// ==========================================================================
+.footer {
+  position: relative;
+  padding: 80px 0 40px;
+  background-color: $color-surface;
+  text-align: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    @include lumu-gradient();
+  }
+
+  &__title {
+    font-family: $font-heading;
+    margin-bottom: 8px;
+  }
+
+  &__text {
+    color: $color-text-muted;
+    margin-bottom: 28px;
+  }
+
+  &__copyright {
+    margin-top: 32px;
+    font-size: 0.8rem;
+    color: rgba($color-text-muted, 0.6);
+  }
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 8px;
+
+  a {
+    @include flex-center();
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba($color-text-muted, 0.4);
+    font-size: 1.1rem;
+    transition: background-color $transition-fast, transform $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      background-color: $color-pink-dark; // darker than the pale accent so the white icon stays legible
+      border-color: $color-pink-dark;
+      transform: translateY(-3px);
+    }
+  }
+}
+
+// ==========================================================================
+// MODAL
+// ==========================================================================
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  @include flex-center();
+  display: none; // must come after the mixin, which also sets display:flex
+
+  &.is-open {
+    display: flex;
+  }
+
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(black, 0.7);
+  }
+
+  &__box {
+    position: relative;
+    z-index: 1;
+    background-color: $color-surface;
+    border-radius: 16px;
+    max-width: 480px;
+    width: 90%;
+    padding: 32px;
+    text-align: center;
+    animation: modal-pop 0.3s ease;
+  }
+
+  &__img {
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+
+  &__title {
+    font-family: $font-heading;
+    margin-bottom: 12px;
+  }
+
+  &__text {
+    color: $color-text-muted;
+  }
+
+  &__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: $color-text-muted;
+    font-size: 1.3rem;
+    cursor: pointer;
+
+    &:hover {
+      color: $color-text;
+    }
+  }
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// ==========================================================================
+// RESPONSIVE TWEAKS FOR REQUIRED RESOLUTIONS
+// ==========================================================================
+@include respond($bp-1366) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@include respond($bp-1024) {
+  .about__columns {
+    gap: 20px;
+  }
+}
+
+@include respond($bp-768) {
+  .navbar__links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .about-card {
+    flex: 1 1 100%;
+    max-width: 360px;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+}

@@ -1,13 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MP1</title>
-    </head>
-    <body>
-        <h1>Hello World! Welcome to MP1!</h1>
-        <img src="assets/image.jpg">
-    </body>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LUMU | WANG LUJIE x MU ZHICHENG</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap"
+    />
+  </head>
+  <body>
+    <!-- ============ NAVBAR ============ -->
+    <header class="navbar" id="navbar">
+      <div class="navbar__inner">
+        <a href="#hero" class="navbar__logo">LU<span>MU</span></a>
+        <nav class="navbar__nav">
+          <ul class="navbar__links">
+            <li><a href="#hero" class="navbar__link nav-link active" data-section="hero">Home</a></li>
+            <li><a href="#about" class="navbar__link nav-link" data-section="about">About</a></li>
+            <li><a href="#gallery" class="navbar__link nav-link" data-section="gallery">Gallery</a></li>
+            <li><a href="#moments" class="navbar__link nav-link" data-section="moments">Moments</a></li>
+            <li><a href="#video" class="navbar__link nav-link" data-section="video">Video</a></li>
+            <li><a href="#contact" class="navbar__link nav-link" data-section="contact">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- ============ HERO ============ -->
+      <section class="hero" id="hero">
+        <div class="hero__overlay"></div>
+        <div class="hero__content fade-in-el">
+          <h1 class="hero__title">LUMU</h1>
+          <p class="hero__subtitle">Wang Lujie &times; Mu Zhicheng — a phenomenon-level, top-tier Chinese duo idol group</p>
+          <a href="#about" class="btn btn--primary nav-link" data-section="about">Discover More</a>
+        </div>
+        <div class="hero__scroll-hint">
+          <i class="fa-solid fa-chevron-down"></i>
+        </div>
+      </section>
+
+      <!-- ============ ABOUT (multi-column) ============ -->
+      <section class="about" id="about">
+        <div class="container">
+          <h2 class="section-title fade-in-el">About LUMU</h2>
+          <p class="section-lead fade-in-el">
+            "LUMU" (Lujie Wang × Zhicheng Mu) is the most talked-about duo in the T-Family fandom right now. Recently, they've drawn attention through their duo card from the 2026 TF Family Summer Sports Games, fan support events, and a steady stream of fan content.
+          </p>
+          <div class="about__columns">
+            <article class="about-card about-card--blue fade-in-el">
+              <img src="assets/profile-wang.jpg" alt="Profile photo of Wang Lujie" class="about-card__img" />
+              <h3 class="about-card__title">Wang Lujie</h3>
+              <p class="about-card__text">Wang Lujie is a Mainland Chinese singer and actor, a trainee under Beijing Time Peak Culture &amp; Art Development Co., Ltd.'s TF Family. Since October 6, 2022, he has appeared in original variety shows and various performances as a 4th-generation TF Family trainee.</p>
+            </article>
+            <article class="about-card about-card--gradient fade-in-el">
+              <img src="assets/profile-lumu.jpg" alt="Photo of the LUMU pairing" class="about-card__img" />
+              <h3 class="about-card__title">LUMU Duo</h3>
+              <p class="about-card__text">LUMU is a phenomenon-level, top-tier Chinese duo idol group formed by Wang Lujie and Mu Zhicheng. Their distinctive musical style and stage presence have earned them enormous popularity within the TF Family and the wider fan community.</p>
+            </article>
+            <article class="about-card about-card--pink fade-in-el">
+              <img src="assets/profile-mu.jpg" alt="Profile photo of Mu Zhicheng" class="about-card__img" />
+              <h3 class="about-card__title">Mu Zhicheng</h3>
+              <p class="about-card__text">Mu Zhicheng is a Mainland Chinese singer and actor. In August 2016, he was selected into the TF Family training camp. Since October 2019, he has taken part in TF Family 3rd-generation trainee group variety shows and performances, launching his entertainment career.</p>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ GALLERY (carousel) ============ -->
+      <section class="gallery" id="gallery">
+        <div class="container">
+          <h2 class="section-title fade-in-el">Gallery</h2>
+          <div class="carousel fade-in-el" id="carousel">
+            <div class="carousel__track" id="carouselTrack">
+              <div class="carousel__slide">
+                <img src="assets/carousel-1.jpg" alt="Placeholder gallery photo one" />
+                <p class="carousel__caption">Photo 1</p>
+              </div>
+              <div class="carousel__slide">
+                <img src="assets/carousel-2.jpg" alt="Placeholder gallery photo two" />
+                <p class="carousel__caption">Photo 2</p>
+              </div>
+              <div class="carousel__slide">
+                <img src="assets/carousel-3.jpg" alt="Placeholder gallery photo three" />
+                <p class="carousel__caption">Photo 3</p>
+              </div>
+            </div>
+            <button class="carousel__arrow carousel__arrow--prev" id="prevSlide" aria-label="Previous slide">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="carousel__arrow carousel__arrow--next" id="nextSlide" aria-label="Next slide">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div class="carousel__dots" id="carouselDots"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MOMENTS (fixed background + vertical centering + modal trigger) ============ -->
+      <section class="moments" id="moments">
+        <div class="moments__center">
+          <h2 class="moments__title fade-in-el">Moments</h2>
+          <p class="moments__text fade-in-el">
+            From candid backstage snapshots to fan-captured stage highlights, take a closer look at LUMU beyond the spotlight.
+          </p>
+          <button class="btn btn--outline" id="openModal">View Bonus Content</button>
+        </div>
+      </section>
+
+      <!-- ============ VIDEO ============ -->
+      <section class="video-section" id="video">
+        <div class="container">
+          <h2 class="section-title fade-in-el">Video</h2>
+          <p class="section-lead fade-in-el">Their debut sing-and-dance stage performance, "Devil From Heaven"</p>
+          <div class="video-wrapper fade-in-el">
+            <video controls poster="assets/video-poster.jpg" preload="metadata">
+              <source src="assets/lumu-video.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CONTACT / FOOTER ============ -->
+      <footer class="footer" id="contact">
+        <div class="container footer__inner">
+          <h2 class="footer__title">Stay Connected</h2>
+          <p class="footer__text">Follow LUMU for the latest updates, fan events, and behind-the-scenes moments.</p>
+          <ul class="social-icons">
+            <li><a href="https://weibo.com/p/100808b8c5d6416e3ac27e46c7a60ec1966b0a" aria-label="Weibo"><i class="fa-brands fa-weibo"></i></a></li>
+            <li><a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a></li>
+            <li><a href="#" aria-label="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a></li>
+            <li><a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a></li>
+            <li><a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a></li>
+          </ul>
+          <p class="footer__copyright">&copy; 2026 LUMU Fan Page — built for CS409 MP1.</p>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ============ MODAL ============ -->
+    <div class="modal" id="modal">
+      <div class="modal__backdrop" id="modalBackdrop"></div>
+      <div class="modal__box">
+        <button class="modal__close" id="closeModal" aria-label="Close modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img src="assets/modal-extra.jpg" alt="Placeholder bonus content photo" class="modal__img" />
+        <h3 class="modal__title">Bonus Content</h3>
+        <p class="modal__text">
+          October 6th this year marks the anniversary of their public debut as a duo. Fans have organized support events for the occasion around the world and even into space, including but not limited to: large-screen displays, gift favors, and drone shows.
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
